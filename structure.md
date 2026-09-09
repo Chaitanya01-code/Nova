@@ -1,6 +1,23 @@
 # Nova Project Structure
 
-This document describes the current project layout. Generated and ignored directories such as `node_modules/`, `dist/`, `__pycache__/`, and `.git/` are omitted.
+This document describes the current project layout and ownership boundaries. Generated and ignored directories such as `node_modules/`, `dist/`, `__pycache__/`, and `.git/` are omitted.
+
+## Architecture Boundaries
+
+- `backend/` contains the Python service, domain modules, API routes, workers, persistence, model integrations, and backend tests.
+- `frontend/` is the only npm workspace and contains the Vite React application. Install JavaScript dependencies from the repository root.
+- `data/` contains runtime data areas and is kept separate from application source code.
+- `docs/` contains product and architecture documentation; deployment-specific files belong under `infrastructure/`.
+- `infrastructure/` contains Docker, Kubernetes, monitoring, reverse-proxy, and Terraform assets.
+- `scripts/` contains cross-platform setup, development, health, and maintenance entrypoints.
+- Root configuration files define repository-wide tooling; service-specific configuration belongs inside its service directory.
+
+## Conventions
+
+- Keep API transport concerns in `backend/app/api/`; place business logic in the owning domain module.
+- Keep reusable frontend UI in `frontend/src/components/`, route-level views in `frontend/src/pages/`, and network calls in `frontend/src/services/`.
+- Keep tests under `backend/tests/` and mirror the owning domain or integration boundary.
+- Use the root `package-lock.json`; do not create a second lockfile inside `frontend/`.
 
 ```text
 Nova/
@@ -16,7 +33,10 @@ Nova/
 |   |-- app/
 |   |   |-- __init__.py
 |   |   |-- config.py
+|   |   |-- constants.py
 |   |   |-- dependencies.py
+|   |   |-- exceptions.py
+|   |   |-- logging_config.py
 |   |   |-- main.py
 |   |   |-- agents/
 |   |   |   |-- __init__.py
@@ -95,11 +115,17 @@ Nova/
 |   |   |       `-- voice.py
 |   |   |-- applications/
 |   |   |   |-- __init__.py
+|   |   |   |-- action.py
+|   |   |   |-- application.py
+|   |   |   |-- application_info.py
+|   |   |   |-- capabilities.py
 |   |   |   |-- controller.py
 |   |   |   |-- detector.py
+|   |   |   |-- discovery.py
 |   |   |   |-- launcher.py
 |   |   |   |-- permissions.py
 |   |   |   |-- registry.py
+|   |   |   `-- session.py
 |   |   |   |-- adapters/
 |   |   |   |   |-- __init__.py
 |   |   |   |   |-- base.py
@@ -292,9 +318,16 @@ Nova/
 |   |   |-- orchestration/
 |   |   |   |-- __init__.py
 |   |   |   |-- agent_communication.py
+|   |   |   |-- agent_selector.py
+|   |   |   |-- event_bus.py
+|   |   |   |-- execution_manager.py
 |   |   |   |-- orchestrator.py
 |   |   |   |-- planner.py
+|   |   |   |-- state_manager.py
+|   |   |   |-- task.py
+|   |   |   |-- task_graph.py
 |   |   |   |-- task_manager.py
+|   |   |   |-- tool_selector.py
 |   |   |   `-- workflow_engine.py
 |   |   |-- rag/
 |   |   |   |-- __init__.py
@@ -440,7 +473,6 @@ Nova/
 |-- frontend/
 |   |-- index.html
 |   |-- package.json
-|   |-- package-lock.json
 |   |-- vite.config.js
 |   |-- public/
 |   `-- src/
@@ -460,7 +492,16 @@ Nova/
 |       |   |-- tasks/
 |       |   `-- voice/
 |       |-- context/
+|       |   |-- AuthContext.jsx
+|       |   |-- NovaContext.jsx
+|       |   `-- VoiceContext.jsx
 |       |-- hooks/
+|       |   |-- useAgents.js
+|       |   |-- useApplications.js
+|       |   |-- useChat.js
+|       |   |-- useNova.js
+|       |   |-- useTasks.js
+|       |   `-- useVoice.js
 |       |-- layouts/
 |       |-- pages/
 |       |   |-- Agents.jsx
@@ -479,6 +520,10 @@ Nova/
 |       |   |-- chat.js
 |       |   `-- tasks.js
 |       |-- stores/
+|       |   |-- applicationStore.js
+|       |   |-- chatStore.js
+|       |   |-- novaStore.js
+|       |   `-- taskStore.js
 |       |-- types/
 |       `-- utils/
 |-- infrastructure/
