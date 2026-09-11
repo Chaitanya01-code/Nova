@@ -1,2 +1,13 @@
-uvicorn 
+uvicorn
 fastapi
+pydantic
+python-dotenv
+requests
+google-generativeai
+python-multipart
+SQLAlchemy
+redis
+psycopg2-binary
+deepgram-sdk
+pytest
+
